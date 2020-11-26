@@ -1,36 +1,36 @@
-enum Command {
-    SET_LED,
-    GET_LED,
-    SET_A_FWD,
-    SET_A_REV,
-    GET_A,
-    SET_B_FWD,
-    SET_B_REV,
-    GET_B,
-    ALL_OFF,
-    RESET_EPO,
-    GET_EPO,
-    SET_EPO_IGNORE,
-    GET_EPO_IGNORE,
-    SET_ALL_FWD,
-    SET_ALL_REV,
-    SET_FAILSAFE,
-    GET_FAILSAFE,
-    SET_ENC_MODE,
-    GET_ENC_MODE,
-    MOVE_A_FWD,
-    MOVE_A_REV,
-    MOVE_B_FWD,
-    MOVE_ALL_FWD,
-    GET_ENC_MOVING,
-    SET_ENC_SPEED,
-    GET_ENC_SPEED,
-    GET_ID,
-    SET_I2C_ADD,
-    VALUE_FWD,
-    VALUE_REV,
-    VALUE_ON,
-    VALUE_OFF
+mod command;
+
+use command::{ Command, CommandValue };
+
+const PWM_MAX: i32 = 255;
+const I2C_MAX_LEN: i32 = 4;
+const I2C_ID_PICOBORG_REV: i32 = 0x15;
+
+fn raw_write(cmd : Command, data : &[u8]) {
+    //data.len()
+    let val = cmd.value();
+    for byte in data {
+
+    }
+}
+
+fn raw_read(cmd : Command) -> u8 {
+    0
+}
+
+pub fn set_led(state : bool) {
+    let data: [u8; 1] = if state {
+        [CommandValue::On.value()]
+    } else {
+        [CommandValue::Off.value()]
+    };
+
+    raw_write(Command::SetLed, &data)
+}
+
+pub fn get_led() -> bool {
+    let val = raw_read(Command::GetLed);
+    return val == CommandValue::On.value();
 }
 
 
