@@ -1,38 +1,319 @@
 mod command;
 
+use std::time::Duration;
+use std::ffi::OsStr;
 use command::{ Command, CommandValue };
 
-const PWM_MAX: i32 = 255;
-const I2C_MAX_LEN: i32 = 4;
-const I2C_ID_PICOBORG_REV: i32 = 0x15;
+const I2C_FOLLOWER: u32 = 0x0703;
+const PWM_MAX: f32 = 255.0;
+const I2C_MAX_LEN: usize = 4;
+const I2C_ID_PICOBORG_REV: u32 = 0x15;
 
-fn raw_write(cmd : Command, data : &[u8]) {
-    //data.len()
-    let val = cmd.value();
-    for byte in data {
+pub struct PiBorg<S> {
+    port: S,
+    retry_count: i32,
+}
 
+impl<S> PiBorg<S> {
+        
+    pub fn open<T: AsRef<OsStr> + ?Sized> (&mut self, port_name: &T) {
+        // let port = serial::open(port_name).unwrap();
+        // let port = serial::open(port_name).unwrap();
+
+        // PiBorg {
+        //     port,
+        //     retry_count: 3
+        // };
+
+        //self.port.set_timeout(Duration::from_secs(1)).unwrap();
+    }
+
+    fn raw_read(&mut self, cmd : Command, buffer : &mut [u8], ) {
+    }
+
+    fn raw_write(&mut self, data : &[u8]) {
+    }
+
+    /// ## Summary
+    /// 
+    /// Sets the current state of the LED.
+    ///
+    /// ## Parameters
+    /// 
+    /// state: true for on; false for off.
+    ///
+    pub fn set_led(&mut self, state : bool) {
+        let data: [u8; 2] = if state {
+            [Command::SetLed.value(), CommandValue::On.value()]
+        } else {
+            [Command::SetLed.value(), CommandValue::Off.value()]
+        };
+        
+        self.raw_write(&data)
+    }
+    
+    /// ## Summary
+    /// 
+    /// Reads the current state of the LED.
+    /// 
+    /// ## Return value
+    /// 
+    /// true if the LED is on; false otherwise.
+    /// 
+    pub fn get_led(&mut self) -> bool {
+        let mut buffer: [u8; I2C_MAX_LEN] = [0; I2C_MAX_LEN];
+        self.raw_read(Command::GetLed, &mut buffer);
+        buffer[1] == CommandValue::On.value()
+    }
+
+    /// ## Summary
+    ///
+    /// Sets the drive level for motor 1.
+    /// 
+    /// ## Parameters
+    ///  
+    /// power: The power to set. Allowed interval: [-1, 1].
+    ///
+    /// ## Example
+    ///
+    /// ```no_run
+    /// # use piborg::PiBorg;
+    /// 
+    /// let mut driver = PiBorg::new();
+    /// // Stop motor 1.
+    /// driver.set_motor1(0);
+    /// // Set motor 1 forward at 75% power.
+    /// driver.set_motor1(0.75);
+    /// // Set motor 1 reverse at 50% power.
+    /// driver.set_motor1(-0.5);
+    /// // Set motor 1 forward at 100% power.
+    /// driver.set_motor1(1);
+    /// ```
+    /// 
+    /// ## Remarks
+    /// 
+    /// Power is capped at [-1, 1], any higher/lower will be reduced.
+    /// 
+    pub fn set_motor1(&mut self, power: f32) {
+        let command = if power >= 0.0 {
+            Command::SetBFwd
+        } else {
+            Command::SetBRev
+        };
+
+        let pwm = power_to_pwm(power);
+
+        self.raw_write(&[command.value(), pwm])
+    }
+    
+    /// ## Summary
+    ///
+    /// Gets the drive level for motor 1.
+    ///
+    /// ## Return value
+    /// 
+    /// 
+    /// 
+    /// ## Example
+    ///
+    /// ```no_run
+    /// # use piborg::PiBorg;
+    /// 
+    /// let mut driver = PiBorg::new();
+    /// // Stop motor 1.
+    /// driver.set_motor1(0);
+    /// // Returns ~ 0.0
+    /// driver.get_motor1();
+    /// // Set motor 1 forward at 75% power.
+    /// driver.set_motor1(0.75);
+    /// // Returns ~ 0.75
+    /// driver.get_motor1();
+    /// // Set motor 1 reverse at 50% power.
+    /// driver.set_motor1(-0.5);
+    /// // Returns ~ -0.5
+    /// driver.get_motor1();
+    /// // Set motor 1 forward at 100% power.
+    /// driver.set_motor1(1);
+    /// // Returns ~ 1.0
+    /// driver.get_motor(1);
+    /// ```
+    /// 
+    pub fn get_motor1(&mut self) -> f32 {
+        let mut buffer: [u8; I2C_MAX_LEN] = [0; I2C_MAX_LEN];
+        self.raw_read(Command::GetA, &mut buffer);
+
+        let power = buffer[2] as f32 / PWM_MAX;
+
+        if buffer[1] == CommandValue::Fwd.value() {
+            power
+        }
+        else {
+            -power
+        }
+    }
+
+    /// ## Summary
+    ///
+    /// Sets the drive level for motor 2, from +1 to -1.
+    ///
+    /// ## Example
+    ///
+    /// ```no_run
+    /// # use piborg::PiBorg;
+    /// 
+    /// let mut driver = PiBorg::new();
+    /// // Stop motor 2.
+    /// driver.set_motor2(0);
+    /// // Set motor 2 forward at 75% power.
+    /// driver.set_motor2(0.75);
+    /// // Set motor 2 reverse at 50% power.
+    /// driver.set_motor2(-0.5);
+    /// // Set motor 2 forward at 100% power.
+    /// driver.set_motor2(1);
+    /// ```
+    /// 
+    /// ## Remarks
+    /// 
+    /// Power is capped at [-1, 1], any higher/lower will be reduced.
+    /// 
+    pub fn set_motor2(&mut self, power: f32) {
+        let command = if power >= 0.0 {
+            Command::SetAFwd
+        } else {
+            Command::SetARev
+        };
+
+        let pwm = power_to_pwm(power);
+
+        self.raw_write(&[command.value(), pwm])
+    }
+
+    /// ## Summary
+    ///
+    /// Gets the drive level for motor 2, from +1 to -1.
+    ///
+    /// ## Example
+    ///
+    /// ```no_run
+    /// # use piborg::PiBorg;
+    /// 
+    /// let mut driver = PiBorg::new();
+    /// // Stop motor 2.
+    /// driver.set_motor1(0);
+    /// // Returns ~ 0.0
+    /// driver.get_motor1();
+    /// // Set motor 2 forward at 75% power.
+    /// driver.set_motor1(0.75);
+    /// // Returns ~ 0.75
+    /// driver.get_motor1();
+    /// // Set motor 2 reverse at 50% power.
+    /// driver.set_motor1(-0.5);
+    /// // Returns ~ -0.5
+    /// driver.get_motor1();
+    /// // Set motor 2 forward at 100% power.
+    /// driver.set_motor1(1);
+    /// // Returns ~ 1.0
+    /// driver.get_motor(1);
+    /// ```
+    /// 
+    pub fn get_motor2(&mut self) -> f32 {
+        let mut buffer: [u8; I2C_MAX_LEN] = [0; I2C_MAX_LEN];
+        self.raw_read(Command::GetA, &mut buffer);
+
+        let power = buffer[2] as f32 / PWM_MAX;
+
+        if buffer[1] == CommandValue::Fwd.value() {
+            power
+        }
+        else {
+            -power
+        }
+    }
+
+    pub fn set_motors(&mut self, power: f32) {
+        let command = if power >= 0.0 { 
+            Command::SetAllFwd 
+        } else {
+            Command::SetAllRev
+        };
+
+        let pwm = power_to_pwm(power);
+
+        self.raw_write(&[command.value(), pwm])
+    }
+
+    pub fn stop_motors(&mut self) {
+        self.raw_write(&[Command::AllOff.value(), 0])
+    }
+
+    pub fn reset_epo(&mut self) {
+        self.raw_write(&[Command::ResetEpo.value(), 0])
+    }
+
+    pub fn get_epo(&mut self) -> bool {
+        let mut buffer: [u8; I2C_MAX_LEN] = [0; I2C_MAX_LEN];
+        self.raw_read(Command::GetEpo, &mut buffer);
+        
+        buffer[1] == CommandValue::On.value()
+    }
+
+    pub fn set_epo_ignore(&mut self, state: bool) {
+        let data: [u8; 2] = if state {
+            [Command::SetEpoIgnore.value(), CommandValue::On.value()]
+        }
+        else {
+            [Command::SetEpoIgnore.value(), CommandValue::Off.value()]
+        };
+
+        self.raw_write(&data);
+    }
+
+    pub fn get_epo_ignore(&mut self) -> bool {
+        let mut buffer: [u8; I2C_MAX_LEN] = [0; I2C_MAX_LEN];
+        self.raw_read(Command::GetEpoIgnore, &mut buffer);
+        
+        buffer[1] == CommandValue::On.value()
+    }
+
+    pub fn set_comms_failsafe(&mut self, state: bool) {
+        let data: [u8; 2] = if state {
+            [Command::SetFailsafe.value(), CommandValue::On.value()]
+        }
+        else {
+            [Command::SetFailsafe.value(), CommandValue::Off.value()]
+        };
+
+        self.raw_write(&data);
+    }
+
+    pub fn get_comms_failsafe(&mut self) -> bool {
+        let mut buffer: [u8; I2C_MAX_LEN] = [0; I2C_MAX_LEN];
+        self.raw_read(Command::GetFailsafe, &mut buffer);
+        
+        buffer[1] == CommandValue::On.value()
+    }
+
+    pub fn get_drive_fault(&mut self) -> bool {
+        let mut buffer: [u8; I2C_MAX_LEN] = [0; I2C_MAX_LEN];
+        self.raw_read(Command::GetDriveFault, &mut buffer);
+        
+        buffer[1] == CommandValue::On.value()
     }
 }
 
-fn raw_read(cmd : Command) -> u8 {
-    0
+fn power_to_pwm(power: f32) -> u8 {
+    let mut pwm = PWM_MAX * power;
+    
+    if power < 0.0 {
+        pwm *= -1.0;
+    }
+
+    if pwm > PWM_MAX {
+        pwm = PWM_MAX;
+    }
+
+    pwm as u8
 }
-
-pub fn set_led(state : bool) {
-    let data: [u8; 1] = if state {
-        [CommandValue::On.value()]
-    } else {
-        [CommandValue::Off.value()]
-    };
-
-    raw_write(Command::SetLed, &data)
-}
-
-pub fn get_led() -> bool {
-    let val = raw_read(Command::GetLed);
-    return val == CommandValue::On.value();
-}
-
 
 fn main() {
     println!("Hello, world!");
