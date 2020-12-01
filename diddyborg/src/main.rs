@@ -1,37 +1,37 @@
 mod command;
 
-use std::time::Duration;
-use std::ffi::OsStr;
+use i2cdev::linux::{LinuxI2CDevice, LinuxI2CError, LinuxI2CMessage};
 use command::{ Command, CommandValue };
 
 const I2C_FOLLOWER: u32 = 0x0703;
 const PWM_MAX: f32 = 255.0;
 const I2C_MAX_LEN: usize = 4;
 const I2C_ID_PICOBORG_REV: u32 = 0x15;
-
-pub struct PiBorg<S> {
-    port: S,
-    retry_count: i32,
+const PERIPHERAL_ID: u16 = 0x44;
+const I2C_PATH: &str = "/dev/i2c-1";
+pub struct PiBorg {
+    port: LinuxI2CDevice,
 }
 
-impl<S> PiBorg<S> {
-        
-    pub fn open<T: AsRef<OsStr> + ?Sized> (&mut self, port_name: &T) {
-        // let port = serial::open(port_name).unwrap();
-        // let port = serial::open(port_name).unwrap();
-
-        // PiBorg {
-        //     port,
-        //     retry_count: 3
-        // };
-
-        //self.port.set_timeout(Duration::from_secs(1)).unwrap();
+impl PiBorg {
+    
+    pub fn new() -> Self {
+        PiBorg {
+            LinuxI2CDevice::new("/dev/i2c-1", PERIPHERAL_ID),
+        }
     }
 
     fn raw_read(&mut self, cmd : Command, buffer : &mut [u8], ) {
+        let mut msgs = [
+            LinuxI2CMessage::write(&[cmd.value()]),
+            LinuxI2CMessage::read(&mut buffer),
+        ];
+
+        self.port.transfer(msgs).unwrap();
     }
 
     fn raw_write(&mut self, data : &[u8]) {
+        self.port.write(&data);
     }
 
     /// ## Summary
