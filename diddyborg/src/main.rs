@@ -1,7 +1,11 @@
 mod command;
 
+use i2cdev::core::*;
 use i2cdev::linux::{LinuxI2CDevice, LinuxI2CError, LinuxI2CMessage};
 use command::{ Command, CommandValue };
+
+use std::time::Duration;
+use std::thread;
 
 const I2C_FOLLOWER: u32 = 0x0703;
 const PWM_MAX: f32 = 255.0;
@@ -16,22 +20,21 @@ pub struct PiBorg {
 impl PiBorg {
     
     pub fn new() -> Self {
+        let port = LinuxI2CDevice::new("/dev/i2c-1", PERIPHERAL_ID).unwrap();
+        
         PiBorg {
-            LinuxI2CDevice::new("/dev/i2c-1", PERIPHERAL_ID),
+            port
         }
     }
 
-    fn raw_read(&mut self, cmd : Command, buffer : &mut [u8], ) {
-        let mut msgs = [
-            LinuxI2CMessage::write(&[cmd.value()]),
-            LinuxI2CMessage::read(&mut buffer),
-        ];
-
-        self.port.transfer(msgs).unwrap();
+    fn raw_read(&mut self, cmd : Command, mut buffer : &mut [u8]) {
+        self.port.write(&[cmd.value()]).unwrap();
+        thread::sleep(Duration::from_millis(10));
+        self.port.read(&mut buffer).unwrap();
     }
 
     fn raw_write(&mut self, data : &[u8]) {
-        self.port.write(&data);
+        self.port.write(&data).unwrap();
     }
 
     /// ## Summary
@@ -63,6 +66,9 @@ impl PiBorg {
     pub fn get_led(&mut self) -> bool {
         let mut buffer: [u8; I2C_MAX_LEN] = [0; I2C_MAX_LEN];
         self.raw_read(Command::GetLed, &mut buffer);
+
+        println!("buffer {:?}", &buffer);
+
         buffer[1] == CommandValue::On.value()
     }
 
@@ -316,5 +322,9 @@ fn power_to_pwm(power: f32) -> u8 {
 }
 
 fn main() {
-    println!("Hello, world!");
+    let mut piborg = PiBorg::new();
+    piborg.set_motor1(-0.7);
+    piborg.set_motor2(0.7);
+    thread::sleep(Duration::from_millis(5000));
+    piborg.stop_motors();
 }
