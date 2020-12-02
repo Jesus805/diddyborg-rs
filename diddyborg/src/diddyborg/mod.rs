@@ -63,7 +63,7 @@ impl DiddyBorg {
         }
         
         // Ensure that the device is a Diddyborg.
-        match DiddyBorg::get_diddyborg_id(dev) {
+        match DiddyBorg::get_diddyborg_id(&mut dev) {
             Ok(id) => {
                 if id == I2C_ID_PICOBORG_REV {
                     // The device is a DiddyBorg.
