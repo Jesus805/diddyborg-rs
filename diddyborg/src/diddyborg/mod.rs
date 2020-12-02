@@ -641,7 +641,7 @@ impl DiddyBorg {
         self.read_buffer.iter_mut().for_each(|x| *x = 0);
 
         // Write the command then read the data from the DiddyBorg.
-        DiddyBorg::read(self.dev, command, &mut self.read_buffer)
+        DiddyBorg::read(&mut self.dev, command, &mut self.read_buffer)
     }
 
     /// ## Summary
@@ -658,7 +658,7 @@ impl DiddyBorg {
     /// 
     fn raw_write(&mut self, data : &[u8]) -> Result<(), DiddyBorgError> {
         // Write the data to the DiddyBorg.
-        DiddyBorg::write(self.dev, data)
+        DiddyBorg::write(&mut self.dev, data)
     }
 
     /// ## Summary
@@ -673,7 +673,7 @@ impl DiddyBorg {
     /// 
     /// 
     /// 
-    fn get_diddyborg_id<T: I2CDevice>(dev: T) -> Result<u8, DiddyBorgError> {
+    fn get_diddyborg_id<T: I2CDevice>(dev: &mut T) -> Result<u8, DiddyBorgError> {
         let mut buffer: [u8; I2C_READ_LEN] = [0; I2C_READ_LEN];
 
         DiddyBorg::read(dev, Command::GetId, &mut buffer).map(|_| buffer[1])
@@ -695,7 +695,7 @@ impl DiddyBorg {
     /// 
     /// 
     /// 
-    fn read<T: I2CDevice>(dev: T, command: Command, mut buffer : &mut [u8]) -> Result<(), DiddyBorgError> {
+    fn read<T: I2CDevice>(dev: &mut T, command: Command, mut buffer : &mut [u8]) -> Result<(), DiddyBorgError> {
         match dev.write(&[command.value()]) {
             Ok(_) => {},
             Err(_) => { return Err(DiddyBorgError { })}
@@ -723,7 +723,7 @@ impl DiddyBorg {
     /// 
     /// 
     /// 
-    fn write<T: I2CDevice>(dev: T, data : &[u8]) -> Result<(), DiddyBorgError> {
+    fn write<T: I2CDevice>(dev: &mut T, data : &[u8]) -> Result<(), DiddyBorgError> {
         match dev.write(&data) {
             Ok(_) => Ok(()),
             Err(_) => { Err(DiddyBorgError { }) },
