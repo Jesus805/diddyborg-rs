@@ -1,3 +1,6 @@
+/// ## Summary
+/// Represents a I2C Command to write to the PicoBorgRev.
+/// 
 pub(crate) enum Command {
     /// Set the LED status.
     SetLed,
@@ -106,9 +109,13 @@ impl Command {
 }
 
 pub(crate) enum CommandValue {
+    // Off
     Off,
+    // On
     On,
+    // Forward
     Fwd,
+    // Reverse
     Rev,
 }
 
