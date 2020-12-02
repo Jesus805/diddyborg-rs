@@ -1,7 +1,7 @@
 mod command;
 
 use command::{ Command, CommandValue };
-use i2cdev::{core::I2CDevice, linux::{LinuxI2CDevice, LinuxI2CError, LinuxI2CMessage}};
+use i2cdev::{core::I2CDevice, linux::{LinuxI2CDevice, LinuxI2CError}};
 use std::path::Path;
 use std::time::Duration;
 use std::thread;
@@ -51,7 +51,7 @@ impl DiddyBorg {
     /// 
     /// 
     pub fn new<P: AsRef<Path>>(path: P, device_address: u16) -> Result<Self, DiddyBorgError> {
-        let dev;
+        let mut dev;
 
         // Try to create a new I2C peripheral.
         match LinuxI2CDevice::new(path, device_address) {
