@@ -1,5 +1,5 @@
 /// ## Summary
-/// Represents a I2C Command to write to the PicoBorgRev.
+/// Represents a I2C Command to write to the DiddyBorg.
 /// 
 pub(crate) enum Command {
     /// Set the LED status.
@@ -108,6 +108,9 @@ impl Command {
     }
 }
 
+/// ## Summary
+/// Represents a Command value to write to the DiddyBorg
+/// 
 pub(crate) enum CommandValue {
     // Off
     Off,

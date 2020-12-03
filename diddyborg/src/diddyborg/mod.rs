@@ -1,18 +1,19 @@
 mod command;
 
-use command::{ Command, CommandValue };
-use i2cdev::{core::I2CDevice, linux::{LinuxI2CDevice, LinuxI2CError}};
-use std::path::Path;
+#[cfg(unix)]
+pub mod linux;
+pub mod mock;
+
 use std::time::Duration;
 use std::thread;
-use super::error::DiddyBorgError;
+use i2cdev::core::I2CDevice;
+use crate::error::DiddyBorgError;
+use command::{Command, CommandValue};
 
+// I2C read length.
+pub(self) const I2C_READ_LEN: usize = 4;
 // Maximum allowable PWM value.
 const PWM_MAX: f32 = 255.0;
-// PicoBorg peripheral ID.
-const I2C_ID_PICOBORG_REV: u8 = 0x15;
-// I2C read length.
-const I2C_READ_LEN: usize = 4;
 // Wait time in milliseconds after sending a command.
 const I2C_WAIT: u64 = 10;
 
@@ -20,68 +21,14 @@ const I2C_WAIT: u64 = 10;
 /// 
 /// Interface for interacting with a DiddyBorg peripheral using I2C.
 /// 
-pub struct DiddyBorg {
+pub struct DiddyBorg<T: I2CDevice> {
     // Interface to I2C peripheral.
-    dev: LinuxI2CDevice,
+    dev: T,
     // Reusable read buffer.
     read_buffer: [u8; I2C_READ_LEN],
 }
 
-impl DiddyBorg {
-    /// ## Summary
-    /// 
-    /// Initialize a new DiddyBorg instance.
-    /// 
-    /// ## Parameters
-    /// 
-    /// path: Path to the I2C file.
-    /// 
-    /// device_address: The I2C address of the peripheral.
-    /// 
-    /// ## Example
-    /// 
-    /// ```no_run
-    /// # use diddyborg::DiddyBorg;
-    /// 
-    /// let mut driver = DiddyBorg::new("/dev/i2c-1", 0x44);
-    /// ```
-    /// 
-    /// ## Errors
-    /// 
-    /// 
-    /// 
-    pub fn new<P: AsRef<Path>>(path: P, device_address: u16) -> Result<Self, DiddyBorgError> {
-        let mut dev;
-
-        // Try to create a new I2C peripheral.
-        match LinuxI2CDevice::new(path, device_address) {
-            Ok(d) => { dev = d },
-            Err(error) => {
-                // Unable to create a new I2C peripheral.
-                return Err(DiddyBorgError { });
-            }
-        }
-        
-        // Ensure that the device is a Diddyborg.
-        match DiddyBorg::get_diddyborg_id(&mut dev) {
-            Ok(id) => {
-                if id == I2C_ID_PICOBORG_REV {
-                    // The device is a DiddyBorg.
-                    Ok(DiddyBorg {
-                        dev,
-                        read_buffer: [0; I2C_READ_LEN],
-                    })
-                }
-                else {
-                    // The device is not a DiddyBorg.
-                    Err(DiddyBorgError { })
-                }
-            }
-            // Failed to read I2C device.
-            Err(error) => Err(error)
-        }
-    }
-
+impl<T: I2CDevice> DiddyBorg<T> {
     /// ## Summary
     /// 
     /// Set the state of the LED.
@@ -191,7 +138,7 @@ impl DiddyBorg {
             Command::SetBRev
         };
 
-        let pwm = DiddyBorg::power_to_pwm(power);
+        let pwm = DiddyBorg::<T>::power_to_pwm(power);
 
         self.raw_write(&[command.value(), pwm])
     }
@@ -287,7 +234,7 @@ impl DiddyBorg {
             Command::SetARev
         };
 
-        let pwm = DiddyBorg::power_to_pwm(power);
+        let pwm = DiddyBorg::<T>::power_to_pwm(power);
 
         self.raw_write(&[command.value(), pwm])
     }
@@ -382,7 +329,7 @@ impl DiddyBorg {
             Command::SetAllRev
         };
 
-        let pwm = DiddyBorg::power_to_pwm(power);
+        let pwm = DiddyBorg::<T>::power_to_pwm(power);
 
         self.raw_write(&[command.value(), pwm])
     }
@@ -673,7 +620,7 @@ impl DiddyBorg {
     /// 
     /// 
     /// 
-    fn get_diddyborg_id<T: I2CDevice>(dev: &mut T) -> Result<u8, DiddyBorgError> {
+    fn get_diddyborg_id(dev: &mut T) -> Result<u8, DiddyBorgError> {
         let mut buffer: [u8; I2C_READ_LEN] = [0; I2C_READ_LEN];
 
         DiddyBorg::read(dev, Command::GetId, &mut buffer).map(|_| buffer[1])
@@ -695,7 +642,7 @@ impl DiddyBorg {
     /// 
     /// 
     /// 
-    fn read<T: I2CDevice>(dev: &mut T, command: Command, mut buffer : &mut [u8]) -> Result<(), DiddyBorgError> {
+    fn read(dev: &mut T, command: Command, mut buffer : &mut [u8]) -> Result<(), DiddyBorgError> {
         match dev.write(&[command.value()]) {
             Ok(_) => {},
             Err(_) => { return Err(DiddyBorgError { })}
@@ -703,10 +650,11 @@ impl DiddyBorg {
 
         thread::sleep(Duration::from_millis(I2C_WAIT));
 
-        match dev.read(&mut buffer) {
-            Ok(_) => Ok(()),
-            Err(_) => { Err(DiddyBorgError { }) }
-        }
+        dev.read(&mut buffer).map_err(|e| {
+            DiddyBorgError {
+
+            }
+        })
     }
 
     /// ## Summary
@@ -723,11 +671,12 @@ impl DiddyBorg {
     /// 
     /// 
     /// 
-    fn write<T: I2CDevice>(dev: &mut T, data : &[u8]) -> Result<(), DiddyBorgError> {
-        match dev.write(&data) {
-            Ok(_) => Ok(()),
-            Err(_) => { Err(DiddyBorgError { }) },
-        }
+    fn write(dev: &mut T, data : &[u8]) -> Result<(), DiddyBorgError> {
+        dev.write(&data).map_err(|e| {
+            DiddyBorgError {
+
+            }
+        })
     }
 
     /// ## Summary
