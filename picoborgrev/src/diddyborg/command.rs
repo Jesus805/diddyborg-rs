@@ -38,6 +38,7 @@ pub(crate) enum Command {
     SetFailsafe,
     /// Get the failsafe flag.
     GetFailsafe,
+    // Allowing dead code since I'm not really interested in implementing encoder mode.
     #[allow(dead_code)]
     /// Set the board into encoder or speed mode.
     SetEncMode,
