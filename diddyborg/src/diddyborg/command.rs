@@ -38,30 +38,43 @@ pub(crate) enum Command {
     SetFailsafe,
     /// Get the failsafe flag.
     GetFailsafe,
+    #[allow(dead_code)]
     /// Set the board into encoder or speed mode.
     SetEncMode,
+    #[allow(dead_code)]
     /// Get the boards current mode, encoder or speed.
     GetEncMode,
+    #[allow(dead_code)]
     /// Move motor 2 forward by n encoder ticks.
     MoveAFwd,
+    #[allow(dead_code)]
     /// Move motor 2 reverse by n encoder ticks.
     MoveARev,
+    #[allow(dead_code)]
     /// Move motor 1 forward by n encoder ticks.
     MoveBFwd,
+    #[allow(dead_code)]
     /// Move motor 1 reverse by n encoder ticks.
     MoveBRev,
+    #[allow(dead_code)]
     /// Move all motors forward by n encoder ticks.
     MoveAllFwd,
+    #[allow(dead_code)]
     /// Move all motors reverse by n encoder ticks.
     MoveAllRev,
+    #[allow(dead_code)]
     /// Get the status of encoders moving.
     GetEncMoving,
+    #[allow(dead_code)]
     /// Set the maximum PWM rate in encoder mode.
     SetEncSpeed,
+    #[allow(dead_code)]
     /// Get the maximum PWM rate in encoder mode.
     GetEncSpeed,
+    #[allow(dead_code)]
     /// Get the board identifier.
     GetId,
+    #[allow(dead_code)]
     /// Set a new I2C address.
     SetI2cAdd,
 }
