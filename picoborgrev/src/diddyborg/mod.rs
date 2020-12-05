@@ -790,7 +790,7 @@ impl DiddyBorg<MockI2CDevice> {
     /// 
     /// 
     /// 
-    pub fn new() -> Self {
+    fn new() -> Self {
         // Create a new mock device.
         DiddyBorg {
             dev: MockI2CDevice::new(),
@@ -798,3 +798,5 @@ impl DiddyBorg<MockI2CDevice> {
         }
     }
 }
+
+
