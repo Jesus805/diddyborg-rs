@@ -10,7 +10,7 @@ use std::thread;
 use command::{Command, CommandValue};
 
 #[cfg(unix)]
-use i2cdev::linux::{LinuxI2CDevice, LinuxI2CError};
+use i2cdev::linux::LinuxI2CDevice;
 
 // I2C read length.
 pub(self) const I2C_READ_LEN: usize = 4;
@@ -746,7 +746,7 @@ impl DiddyBorg<LinuxI2CDevice> {
         }
         
         // Ensure that the device is a Diddyborg.
-        match DiddyBorg::<T>::get_diddyborg_id(&mut dev) {
+        match DiddyBorg::get_diddyborg_id(&mut dev) {
             Ok(id) => {
                 if id == I2C_ID_PICOBORG_REV {
                     // The device is a DiddyBorg.
