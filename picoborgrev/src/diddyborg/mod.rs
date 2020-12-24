@@ -648,7 +648,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     fn read(dev: &mut T, command: Command, mut buffer : &mut [u8]) -> Result<(), DiddyBorgError> {
         match dev.write(&[command.value()]) {
             Ok(_) => {},
-            Err(_) => { return Err(DiddyBorgError { })}
+            Err(e) => { return Err(DiddyBorgError::)}
         }
 
         thread::sleep(Duration::from_millis(I2C_WAIT));
@@ -676,9 +676,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// 
     fn write(dev: &mut T, data : &[u8]) -> Result<(), DiddyBorgError> {
         dev.write(&data).map_err(|e| {
-            DiddyBorgError {
-
-            }
+            DiddyBorgError::I2CError::from(e)
         })
     }
 
@@ -704,7 +702,3 @@ impl<T: I2CDevice> DiddyBorg<T> {
         pwm as u8
     }
 }
-
-
-
-

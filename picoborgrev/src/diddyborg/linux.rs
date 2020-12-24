@@ -36,7 +36,7 @@ impl DiddyBorg<LinuxI2CDevice> {
             Ok(d) => { dev = d },
             Err(error) => {
                 // Unable to create a new I2C peripheral.
-                return Err(DiddyBorgError { });
+                DiddyBorgError::from(error)
             }
         }
         
@@ -52,7 +52,8 @@ impl DiddyBorg<LinuxI2CDevice> {
                 }
                 else {
                     // The device is not a DiddyBorg.
-                    Err(DiddyBorgError { })
+                    let message = format!("Expected ID {} Got ID {}", I2C_ID_PICOBORG_REV, id);
+                    Err(DiddyBorgError::InvalidIdError(message))
                 }
             }
             // Failed to read I2C device.
