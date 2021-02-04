@@ -1,5 +1,9 @@
-pub mod diddyborg;
 pub mod error;
+pub mod diddyborg;
+mod mock;
+mod test;
+#[cfg(any(target_os = "linux"))]
+pub mod linux;
 
 pub use diddyborg::*;
 

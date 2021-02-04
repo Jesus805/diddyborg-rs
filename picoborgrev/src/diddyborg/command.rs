@@ -1,7 +1,8 @@
 /// ## Summary
+/// 
 /// Represents a I2C Command to write to the DiddyBorg.
 /// 
-pub(crate) enum Command {
+pub enum Command {
     /// Set the LED status.
     SetLed,
     /// Get the LED status.
@@ -80,13 +81,9 @@ pub(crate) enum Command {
     SetI2cAdd,
 }
 
-impl Command {
-    /// ## Summary
-    ///
-    /// Convert a Command to it's byte equivalent.
-    ///
-    pub(crate) fn value(&self) -> u8 {
-        match self {
+impl From<Command> for u8 {
+    fn from(command : Command) -> Self {
+        match command {
             Command::SetLed => 0x01,
             Command::GetLed => 0x02,
             Command::SetAFwd => 0x03,
@@ -123,29 +120,25 @@ impl Command {
 }
 
 /// ## Summary
+/// 
 /// Represents a Command value to write to the DiddyBorg
 /// 
-pub(crate) enum CommandValue {
-    // Off
+pub enum CommandValue {
+    // Off.
     Off,
-    // On
+    // On.
     On,
-    // Forward
+    // Forward.
     Fwd,
-    // Reverse
+    // Reverse.
     Rev,
 }
 
-impl CommandValue {
-    /// ## Summary
-    ///
-    /// Convert a CommandValue to it's byte equivalent.
-    ///
-    pub(crate) fn value(&self) -> u8 {
+impl Into<u8> for CommandValue {
+    fn into(self) -> u8 {
         match self {
             CommandValue::Off => 0x00,        
             CommandValue::On => 0x01,
-
             CommandValue::Fwd => 0x01,
             CommandValue::Rev => 0x02,
         }

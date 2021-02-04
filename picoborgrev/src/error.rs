@@ -1,23 +1,35 @@
-use std::fmt;
+use std::fmt::{Display, Formatter, Result};
+use std::error::Error;
 
-#[cfg(any(target_os = "linux", target_os = "android"))]
-use i2cdev::linux;
-
+/// ## Summary
+/// 
+/// A DiddyBorg error.
+/// 
 #[derive(Debug)]
-pub enum DiddyBorgError {
-    #[cfg(any(target_os = "linux", target_os = "android"))]
-    I2CError(LinuxI2CError),
-    InvalidPicoBorgDataError(String),
-    InvalidIdError(String)
+pub enum DiddyBorgError<T> where T: Error {
+    // An error occured when trying to read from I2C.
+    I2C(T),
+    // Invalid Data received.
+    CorruptedData,
+    // A PicoBorg Reverse could not be found with the given I2C address.
+    NotFound,
 }
 
-impl fmt::Display for DiddyBorgError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            #[cfg(any(target_os = "linux", target_os = "android"))]
-            DiddyBorgError::I2CError(ref e) => fmt::Display(e, f),
-            DiddyBorgError::InvalidIdError(ref e) => "Invalid PicoBorgRev ID",
-            DiddyBorgError::InvalidPicoBorgDataError(ref e) => "",
+impl<T: Error> Display for DiddyBorgError<T> {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        match self {
+            DiddyBorgError::I2C(_) => write!(f, "I2C error occured"),
+            DiddyBorgError::CorruptedData => write!(f, "Corrupted Data Received"),
+            DiddyBorgError::NotFound => write!(f, "Invalid PicoBorgRev ID"),
+        }
+    }
+}
+
+impl<T: Error + 'static> Error for DiddyBorgError<T> {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            DiddyBorgError::I2C(e) => Some(e),
+            _ => None,
         }
     }
 }
