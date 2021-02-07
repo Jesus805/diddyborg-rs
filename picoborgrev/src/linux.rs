@@ -41,10 +41,7 @@ impl DiddyBorg<LinuxI2CDevice> {
         DiddyBorg::get_diddyborg_id(&mut dev).and_then(|id| {
             if id == I2C_ID_PICOBORG_REV {
                 // The device is a DiddyBorg.
-                Ok(DiddyBorg {
-                    dev,
-                    read_buffer: [0; I2C_READ_LEN],
-                })
+                Ok(DiddyBorg::internal_new(dev))
             } else {
                 // The device is not a DiddyBorg.
                 Err(DiddyBorgError::NotFoundError)

@@ -8,7 +8,7 @@ use crate::error::DiddyBorgError;
 use super::command::{Command, CommandValue};
 
 // I2C read length.
-pub(crate) const I2C_READ_LEN: usize = 4;
+const I2C_READ_LEN: usize = 4;
 // Maximum allowable PWM value.
 const PWM_MAX: f32 = 255.0;
 // Wait time in milliseconds after sending a command.
@@ -20,12 +20,20 @@ const I2C_WAIT: u64 = 10;
 /// 
 pub struct DiddyBorg<T: I2CDevice> {
     // Interface to I2C peripheral.
-    pub(crate) dev: T,
+    dev: T,
     // Reusable read buffer.
-    pub(crate) read_buffer: [u8; I2C_READ_LEN],
+    read_buffer: [u8; I2C_READ_LEN],
 }
 
 impl<T: I2CDevice> DiddyBorg<T> {
+    #[cfg(any(target_os = "linux", test))]
+    pub(crate) fn internal_new(dev: T) -> Self {
+        DiddyBorg {
+            dev,
+            read_buffer: [0; I2C_READ_LEN]
+        }
+    }
+
     /// ## Summary
     /// 
     /// Set the state of the LED.
@@ -49,7 +57,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// 
     /// 
     /// 
-    pub fn set_led(&mut self, state : bool) -> Result<(), DiddyBorgError<T::Error>> {
+    pub fn set_led(&mut self, state: bool) -> Result<(), DiddyBorgError<T::Error>> {
         let data: [u8; 2] = if state {
             [Command::SetLed as u8, CommandValue::On as u8]
         } else {

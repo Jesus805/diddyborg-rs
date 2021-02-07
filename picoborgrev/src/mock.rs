@@ -1,17 +1,15 @@
 use i2cdev::mock::MockI2CDevice;
 
-use super::diddyborg::{DiddyBorg, I2C_READ_LEN};
+use super::diddyborg::DiddyBorg;
 
 impl DiddyBorg<MockI2CDevice> {
     /// ## Summary
     /// 
     /// Initialize a new mock DiddyBorg instance.
     /// 
+    #[cfg(any(target_os = "linux", test))]
     pub(crate) fn new() -> Self {
         // Create a new mock device.
-        DiddyBorg {
-            dev: MockI2CDevice::new(),
-            read_buffer: [0; I2C_READ_LEN],
-        }
+        DiddyBorg::internal_new(MockI2CDevice::new())
     }
 }
