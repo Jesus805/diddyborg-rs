@@ -45,7 +45,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// ## Example
     /// 
     /// ```no_run
-    /// # use diddyborg::DiddyBorg;
+    /// # use picoborgrev::diddyborg::DiddyBorg;
     /// 
     /// let mut driver = DiddyBorg::new("/dev/i2c-1", 0x44);
     /// 
@@ -76,7 +76,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// `true` if the LED is on; `false` otherwise.
     /// 
     /// ```no_run
-    /// # use diddyborg::DiddyBorg;
+    /// # use picoborgrev::diddyborg::DiddyBorg;
     /// 
     /// let mut driver = DiddyBorg::new("/dev/i2c-1", 0x44).unwrap();
     /// 
@@ -116,7 +116,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// ## Example
     ///
     /// ```no_run
-    /// # use diddyborg::DiddyBorg;
+    /// # use picoborgrev::diddyborg::DiddyBorg;
     /// # use std::time::Duration;
     /// # use std::thread;
     /// 
@@ -165,7 +165,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// ## Example
     ///
     /// ```no_run
-    /// # use diddyborg::DiddyBorg;
+    /// # use picoborgrev::diddyborg::DiddyBorg;
     /// # use std::time::Duration;
     /// # use std::thread;
     /// 
@@ -218,7 +218,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// ## Example
     ///
     /// ```no_run
-    /// # use diddyborg::DiddyBorg;
+    /// # use picoborgrev::diddyborg::DiddyBorg;
     /// # use std::time::Duration;
     /// # use std::thread;
     /// 
@@ -263,7 +263,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// ## Example
     ///
     /// ```no_run
-    /// # use diddyborg::DiddyBorg;
+    /// # use picoborgrev::diddyborg::DiddyBorg;
     /// # use std::time::Duration;
     /// # use std::thread;
     /// 
@@ -315,7 +315,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// ## Example
     ///
     /// ```no_run
-    /// # use diddyborg::DiddyBorg;
+    /// # use picoborgrev::diddyborg::DiddyBorg;
     /// # use std::time::Duration;
     /// # use std::thread;
     /// 
@@ -360,7 +360,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// ## Example
     ///
     /// ```no_run
-    /// # use diddyborg::DiddyBorg;
+    /// # use picoborgrev::diddyborg::DiddyBorg;
     /// # use std::time::Duration;
     /// # use std::thread;
     /// 
@@ -384,7 +384,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// ## Example
     ///
     /// ```no_run
-    /// # use diddyborg::DiddyBorg;
+    /// # use picoborgrev::diddyborg::DiddyBorg;
     /// 
     /// let mut driver = DiddyBorg::new("/dev/i2c-1", 0x44).unwrap();
     /// 
@@ -411,7 +411,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// ## Example
     ///
     /// ```no_run
-    /// # use diddyborg::DiddyBorg;
+    /// # use picoborgrev::diddyborg::DiddyBorg;
     /// 
     /// let mut driver = DiddyBorg::new("/dev/i2c-1", 0x44).unwrap();
     /// 
@@ -447,7 +447,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// ## Example
     ///
     /// ```no_run
-    /// # use diddyborg::DiddyBorg;
+    /// # use picoborgrev::diddyborg::DiddyBorg;
     /// 
     /// let mut driver = DiddyBorg::new("/dev/i2c-1", 0x44).unwrap();
     /// 
@@ -481,7 +481,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// ## Example
     ///
     /// ```no_run
-    /// # use diddyborg::DiddyBorg;
+    /// # use picoborgrev::diddyborg::DiddyBorg;
     /// 
     /// let mut driver = DiddyBorg::new("/dev/i2c-1", 0x44).unwrap();
     /// 
@@ -519,7 +519,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// ## Example
     ///
     /// ```no_run
-    /// # use diddyborg::DiddyBorg;
+    /// # use picoborgrev::diddyborg::DiddyBorg;
     /// 
     /// let mut driver = DiddyBorg::new("/dev/i2c-1", 0x44).unwrap();
     /// 
@@ -554,7 +554,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// ## Example
     ///
     /// ```no_run
-    /// # use diddyborg::DiddyBorg;
+    /// # use picoborgrev::diddyborg::DiddyBorg;
     /// 
     /// let mut driver = DiddyBorg::new("/dev/i2c-1", 0x44).unwrap();
     /// 
@@ -605,7 +605,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// ## Example
     ///
     /// ```no_run
-    /// # use diddyborg::DiddyBorg;
+    /// # use picoborgrev::diddyborg::DiddyBorg;
     /// 
     /// let mut driver = DiddyBorg::new("/dev/i2c-1", 0x44).unwrap();
     /// 
