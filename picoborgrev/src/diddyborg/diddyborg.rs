@@ -47,7 +47,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// ```no_run
     /// # use picoborgrev::diddyborg::DiddyBorg;
     /// 
-    /// let mut driver = DiddyBorg::new("/dev/i2c-1", 0x44);
+    /// let mut driver = DiddyBorg::new("/dev/i2c-1", 0x44).unwrap();
     /// 
     /// // Turn the LED on.
     /// driver.set_led(true).unwrap();
@@ -131,11 +131,11 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// thread::sleep(Duration::from_millis(2000));
     /// 
     /// // Set motor 1 forward at 100% power for 2 seconds.
-    /// driver.set_motor1(1).unwrap();
+    /// driver.set_motor1(1.0).unwrap();
     /// thread::sleep(Duration::from_millis(2000));
     /// 
     /// // Stop motor 1.
-    /// driver.set_motor1(0).unwrap();
+    /// driver.set_motor1(0.0).unwrap();
     /// ```
     /// 
     /// ## Remarks
@@ -182,7 +182,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// driver.get_motor1().unwrap();
     /// thread::sleep(Duration::from_millis(2000));
     /// // Stop motor 1.
-    /// driver.set_motor1(0).unwrap();
+    /// driver.set_motor1(0.0).unwrap();
     /// // Returns ~ 0
     /// driver.get_motor1().unwrap();
     /// ```
@@ -230,10 +230,10 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// driver.set_motor2(-0.5).unwrap();
     /// thread::sleep(Duration::from_millis(2000));
     /// // Set motor 2 forward at 100% power for 2 seconds.
-    /// driver.set_motor2(1).unwrap();
+    /// driver.set_motor2(1.0).unwrap();
     /// thread::sleep(Duration::from_millis(2000));
     /// // Stop motor 2.
-    /// driver.set_motor2(0).unwrap();
+    /// driver.set_motor2(0.0).unwrap();
     /// ```
     /// 
     /// ## Remarks
@@ -280,7 +280,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// driver.get_motor2().unwrap();
     /// thread::sleep(Duration::from_millis(2000));
     /// // Stop motor 2.
-    /// driver.set_motor2(0).unwrap();
+    /// driver.set_motor2(0.0).unwrap();
     /// // Returns ~ 0
     /// driver.get_motor2().unwrap();
     /// ```
@@ -327,10 +327,10 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// driver.set_motors(-0.5).unwrap();
     /// thread::sleep(Duration::from_millis(2000));
     /// // Set the motors forward at 100% power for 2 seconds.
-    /// driver.set_motors(1).unwrap();
+    /// driver.set_motors(1.0).unwrap();
     /// thread::sleep(Duration::from_millis(2000));
     /// // Stop the motors.
-    /// driver.set_motors(0).unwrap();
+    /// driver.set_motors(0.0).unwrap();
     /// ```
     /// 
     /// ## Remarks
@@ -366,7 +366,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// 
     /// let mut driver = DiddyBorg::new("/dev/i2c-1", 0x44).unwrap();
     /// // Set motors forward at 100% power.
-    /// driver.set_motors(1).unwrap();
+    /// driver.set_motors(1.0).unwrap();
     /// thread::sleep(Duration::from_millis(2000));
     /// 
     /// // Stop motors.
@@ -451,7 +451,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// 
     /// let mut driver = DiddyBorg::new("/dev/i2c-1", 0x44).unwrap();
     /// 
-    /// driver.set_epo_ignore().unwrap();
+    /// driver.set_epo_ignore(true).unwrap();
     /// ```
     /// 
     /// ## Errors
@@ -523,7 +523,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// 
     /// let mut driver = DiddyBorg::new("/dev/i2c-1", 0x44).unwrap();
     /// 
-    /// driver.set_comms_failsafe().unwrap();
+    /// driver.set_comms_failsafe(true).unwrap();
     /// ```
     /// 
     /// ## Errors
@@ -680,7 +680,7 @@ impl<T: I2CDevice> DiddyBorg<T> {
     /// 
     /// 
     #[cfg(target_os = "linux")]
-    fn get_diddyborg_id(dev: &mut T) -> Result<u8, DiddyBorgError<T::Error>> {
+    pub(crate) fn get_diddyborg_id(dev: &mut T) -> Result<u8, DiddyBorgError<T::Error>> {
         let mut buffer: [u8; I2C_READ_LEN] = [0; I2C_READ_LEN];
 
         DiddyBorg::read(dev, Command::GetId, &mut buffer).map(|_| buffer[1])
